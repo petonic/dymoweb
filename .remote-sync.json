@@ -1,0 +1,16 @@
+{
+  "uploadOnSave": true,
+  "useAtomicWrites": false,
+  "deleteLocal": true,
+  "hostname": "karenspi.local",
+  "port": "22",
+  "target": "/home/pi/git/labelpage/",
+  "ignore": [
+    "Old",
+    "tmp"
+  ],
+  "username": "pi",
+  "keyfile": "/Users/petonic/.ssh/id_rsa",
+  "watch": [],
+  "transport": "scp"
+}
