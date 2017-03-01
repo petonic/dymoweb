@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# === LICENSE STATEMENT === v1
+# === LICENSE STATEMENT ===
 # Copyright (c) 2011 Sebastian J. Bronner <waschtl@sbronner.com>
 #
 # Copying and distribution of this file, with or without modification, are
@@ -33,9 +33,12 @@ FONT_CONFIG = {'regular':'/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-R.
                'narrow':'/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-C.ttf'    # narrow/condensed
                }
 FONT_SIZERATIO  = 7./8
+#CONFIG_FILE     = '.dymoprint'
 CONFIG_FILE     = 'dymoprint.ini'
 VERSION         = "0.3.4 (2016-03-14)"
 USE_QR          = True
+FONT_FILENAME = '/usr/share/fonts/truetype/freefont/FreeSans.ttf'
+
 
 from PIL import Image
 from PIL import ImageDraw
@@ -51,13 +54,14 @@ import sys
 import termios
 import textwrap
 import argparse
-from configparser import SafeConfigParser
+import pdb
+from configparser import ConfigParser
 try:
     from pyqrcode import QRCode
-except:
+except Exception as e:
     USE_QR = False
 
-
+import pdb
 class DymoLabeler:
     """Create and work with a Dymo LabelManager PnP object.
 
@@ -82,7 +86,6 @@ class DymoLabeler:
         self.dotTab_ = 0
         self.labelwidth = 0
         self.labelheight = 0
-
         self.dev = open(dev, 'r+')
 
     def sendCommand(self):
@@ -275,21 +278,21 @@ class DymoLabeler:
         response = self.sendCommand()
         print (response)
 
-        #######################################################
-        #######################################################
-        ### End of Class Definitions
-        #######################################################
-        #######################################################
+#######################################################
+#######################################################
+### End of Object Definition
+#######################################################
+#######################################################
 
 def die(message=None):
-    if message: print(message, file=sys.stderr)
-    sys.exit(1)
+  if message: print(message, file=sys.stderr)
+  sys.exit(1)
 
 
 def pprint(par, fd=sys.stdout):
-    rows, columns = struct.unpack('HH', fcntl.ioctl(sys.stderr,
-        termios.TIOCGWINSZ, struct.pack('HH', 0, 0)))
-    print(textwrap.fill(par,columns), file=fd)
+  rows, columns = struct.unpack('HH', fcntl.ioctl(sys.stderr,
+      termios.TIOCGWINSZ, struct.pack('HH', 0, 0)))
+  print >> fd, textwrap.fill(par, columns)
 
 
 def getDeviceFile(classID, vendorID, productID):
@@ -341,9 +344,8 @@ def access_error(dev):
     print("", file=sys.stderr)
     pprint('You probably want to add a rule in /etc/udev/rules.d along the '
         'following lines:', sys.stderr)
-    print ('SUBSYSTEM=="hidraw", ACTION=="add", ATTRS{idVendor}=="%04X", '+
-           'ATTRS{idProduct}=="%04X", GROUP="plugdev"'
-           % (DEV_VENDOR, DEV_PRODUCT), file=sys.stderr)
+    print('SUBSYSTEM=="hidraw", ACTION=="add", ATTRS{idVendor}=="{:4x}", ATTRS{idProduct}=="{:4x}", GROUP="plugdev"'.
+          format(DEV_VENDOR, DEV_PRODUCT), file=sys.stderr)
     print("", file=sys.stderr)
     pprint('Following that, turn off your device and back on again to '
         'activate the new permissions.', sys.stderr)
@@ -352,7 +354,7 @@ def access_error(dev):
 ''' reading config file, input: 'filename' '''
 def read_config(conf_file):
     global FONT_CONFIG
-    conf = SafeConfigParser(FONT_CONFIG)
+    conf = ConfigParser(FONT_CONFIG)
     if not conf.read(conf_file):
         print('# Config file "%s" not found: writing new config file.\n' %conf_file)
         write_config(conf_file)
@@ -367,7 +369,7 @@ def read_config(conf_file):
 
 ''' writing config file, input: 'filename' '''
 def write_config(conf_file):
-    config=SafeConfigParser()
+    config=ConfigParser()
     # adding sections and keys
     config.add_section('FONTS')
     for key in FONT_CONFIG.keys():
@@ -379,17 +381,17 @@ def write_config(conf_file):
 
 ''' scaling pixel up, input: (x,y),scale-factor '''
 def scaling(pix,sc):
-    m=[]
-    for i in range(sc):
-        for j in range(sc):
-            m.append( (pix[0]+i,pix[1]+j) )
-    return m
+  m=[]
+  for i in range(sc):
+      for j in range(sc):
+          m.append( (pix[0]+i,pix[1]+j) )
+  return m
 
 
 ''' decoding text parameter depending on system encoding '''
 def commandline_arg(bytestring):
-    # unicode_string = bytestring.decode(sys.getfilesystemencoding())
-    return bytestring
+  unicode_string = bytestring.decode(sys.getfilesystemencoding())
+  return unicode_string
 
 def get_default_dev():
     if not DEV_NODE:
@@ -418,8 +420,7 @@ def main():
         die(access_error(dev))
 
     # read config file
-    # conf_path = os.path.dirname(sys.argv[0])
-    conf_path = "/home/pi/dymoprint"
+    conf_path = os.path.dirname(sys.argv[0])
     read_config(conf_path+'/'+CONFIG_FILE)
 
     # check for any text specified on the command line
@@ -445,7 +446,7 @@ def main():
     else:
         FONT_FILENAME = FONT_CONFIG['regular']
 
-    if args.u != None:
+    if len(args.u):
         if os.path.isfile(args.u):
             FONT_FILENAME = args.u
         else:
@@ -469,7 +470,7 @@ def main():
         labeldraw = ImageDraw.Draw(labelbitmap)
 
         # draw frame into empty image
-        if args.f != None:
+        if len(args.f):
             labeldraw.rectangle(((0,0),(labelwidth-1,labelheight-1)),fill=255)
             labeldraw.rectangle(((fontoffset,fontoffset),(labelwidth-(fontoffset+1),labelheight-(fontoffset+1))),fill=0)
 
@@ -487,7 +488,7 @@ def main():
         qr_text = code.text().split()
 
         # create an empty label image
-        labelheight = lm._MAX_BYTES_PER_LINE * 8
+        labelheight = e._MAX_BYTES_PER_LINE * 8
         labelwidth = labelheight
         qr_scale = labelheight / len(qr_text)
         qr_offset = (labelheight - len(qr_text)*qr_scale) / 2
@@ -505,7 +506,7 @@ def main():
     # convert the image to the proper matrix for the dymo labeler object
     labelrotated = labelbitmap.transpose(Image.ROTATE_270)
     labelstream = labelrotated.tobytes()
-    labelstreamrowlength = int(labelheight/8) + (1 if labelheight%8 != 0 else 0)
+    labelstreamrowlength = labelheight/8 + (1 if labelheight%8 != 0 else 0)
     if len(labelstream)/labelstreamrowlength != labelwidth:
         die('An internal problem was encountered while processing the label '
             'bitmap!')
@@ -527,19 +528,18 @@ def main():
     if args.v == True:
         print('Previewing label...')
         # fix size, adding print borders
-        labelimage = Image.new('L', (56+labelwidth+56, labelheight))
+        labelimage = Image.new('1', (56+labelwidth+56, labelheight))
         labelimage.paste(labelbitmap, (56,0))
-        # import pdb; pdb.set_trace()
-        # ti = labelimage.convert(colors=2)
-        # print('Image mode is <{}>'.format(ti.mode))
-        inverted_image = PIL.ImageOps.invert(labelimage)
+        ti = labelimage.convert("PNG")
+        print('Image mode is <{}>'.format(ti.mode))
+        inverted_image = PIL.ImageOps.invert(ti)
         try:
           with open("preview.jpeg", "w") as file:
-            inverted_image.save(file, "JPEG");
+            labelimage.save(file, "JPEG");
         except IOError as e:
 
-            print("dymoprint: error generating preview:{}".format(e),
-                  file=sys.stderr)
+            print >> sys.stderr, "dymoprint: error generating preview:{}".\
+                format(e)
             labelimage.show()
     else:
         print('Printing label..')
@@ -547,18 +547,16 @@ def main():
 
 
 if __name__ == '__main__':
-    from bdb import BdbQuit
-    # try:
     main()
-    # except (BdbQuit):
-    #     sys.exit(1)
-    # except:
-    #     import pdb;
-    #     pdb.xpm()
 
 
-# TODO:
-# >
-# OLD:
+# TODO
+# ? support multiple ProductIDs (1001, 1002) -> use usb-modeswitch?
 # o put everything in classes that would need to be used by a GUI
+# x for more options use command line parser framework
+# x allow selection of font with command line options
 # o allow font size specification with command line option (points, pixels?)
+# x provide an option to show a preview of what the label will look like
+# x read and write a .dymoprint file containing user preferences
+# o print graphics and barcodes
+# x plot frame around label

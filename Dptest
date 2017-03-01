@@ -5,14 +5,13 @@ dp = dymoprint
 
 def main():
   print("At the start of MAIN")
-  defDev = dp.get_default_dev()
 
-  lm = dymoprint.DymoLabeler(defDev)
+  lm = dymoprint.DymoLabeler("/dev/null")
   tempLabel = lm.create_label("Foo")
   preview = lm.previewLabel(tempLabel)
   try:
     with open("preview.jpeg", "w") as file:
-      labelimage.save(file, "JPEG");
+      preview.save(file, "JPEG");
   except IOError as e:
 
       print >> sys.stderr, "dymoprint: error generating preview:{}".\
