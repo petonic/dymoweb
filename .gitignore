@@ -1,0 +1,6 @@
+preview.jpeg
+*.pyc
+*.pyo
+app.db
+search.db
+flask
