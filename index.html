@@ -1,12 +1,18 @@
 <html>
 
 <head>
+  <meta name="viewport" content="width=device-width">
+
   <style>
+
   body {
     background-color: powderblue;
     font-size: 16px;
     font-size: 5vw;
   }
+  /*body {
+  zoom: 130%;
+  }*/
 
   input,
   textarea,
@@ -26,9 +32,15 @@
     font: 5vw BlinkMacSystemFont;
   }
 
+  textarea {
+    width:100%;
+    rows:3;
+  }
+
   input[type="checkbox"] {
     zoom: 3;
   }
+
 
   textarea {
     overflow: scroll;
@@ -45,14 +57,15 @@
     font-size: 16px;
     font-size: 5vw;
   }
-  /*#screenFiller {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  border: 15px solid orange
-}*/
+
+  div#loading {
+      width: 35px;
+      height: 35px;
+      display: none;
+      background: url(/imgs/ajax-loader.png) no-repeat;
+      cursor: wait;
+  }
+
 
   </style>
   <!--
@@ -68,12 +81,14 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
   <script>
   $(document).ready(function() {
-    $("[id^=wireCB]").each(function() {
-      var mycookie = $.cookie($(this).attr('name'));
-      if (mycookie && mycookie === "true") {
-        $(this).prop('checked', mycookie);
-      }
-    });
+    if (!({{deleteCookies}})) {
+      $("[id^=wireCB]").each(function() {
+        var mycookie = $.cookie($(this).attr('name'));
+        if (mycookie && mycookie === "true") {
+          $(this).prop('checked', mycookie);
+        }
+      });
+    }
     $("[id^=wireCB]").change(function() {
       console.log("Logging change on " + $(this).attr("name"));
       $.cookie($(this).attr("name"), $(this).prop('checked'), {
@@ -81,7 +96,35 @@
         expires: 365
       });
     });
+    // Select the textArea initially
+    // document.getElementById("textarea").select();
+    // document.getElementById("textarea").focus();
+    // setSelectionRange(0, 9999);
+    $('#select-all').click(function() {
+        document.getElementById("textarea").selectionStart = 0;
+        document.getElementById("textarea").selectionEnd = 999;
+        document.getElementById("textarea").focus();
+    });
+
+    // Makes alignment checkboxes mutually exclusive
+    $('.align-cb').click(function() {
+      $(this).siblings('input:checkbox').prop('checked', false);
+    });
+
+
+
+
+
+
   });
+
+  // Call this to create a loading screen.
+  function loading(){
+      $("#loading").show();
+      $("#content").hide();
+  }
+
+
 
   </script>
 </head>
@@ -91,11 +134,12 @@
     <form class="form-horizontal">
       <fieldset>
         <!-- Form Name -->
-        <legend>Karen's Label Printer v1local</legend>
+        <legend>Karen's Label Printer</legend>
+        <div class="warning" color=red> <font color="red">{{ warnText }} </font></div>
         <!-- Textarea -->
         <div class="form-group">
           <label class="col-md-4 control-label" for="textarea">Label Text</label>
-          <div class="col-md-4"> <textarea class="form-control" id="textarea" name="labelText" font-size=5vw>Up to 3 lines max</textarea> </div>
+          <div class="col-md-4"> <textarea class="form-control" id="textarea" name="labelText" rows=3 font-size=5vw>{{ displayText }}</textarea> </div>
         </div>
         <!-- Multiple Checkboxes (inline) -->
         <div class="form-group">
@@ -103,32 +147,41 @@
           <!-- Multiple Checkboxes (inline) -->
           <!-- Multiple Checkboxes (inline) -->
           <!-- Multiple Checkboxes (inline) -->
-          <label class="col-md-4 control-label" for="wireCB">Wire Label Offset</label>
+          <label class="col-md-4 control-label" for="wireCB">Justification (def: Centered)</label>
           <div class="col-md-4">
-            <input type="checkbox" name="wireCB-Left" id="wireCB-0"> Left </label>
-            <input type="checkbox" name="wireCB-Right" id="wireCB-1"> Right </label>
+            <input type="checkbox" class="align-cb" name="wireCB-Left" id="wireCB-0"> Left </label>
+            <input type="checkbox" class="align-cb" name="wireCB-Right" id="wireCB-1"> Right </label>
           </div>
+          <div class="col-md-4-x">
+
+            <input type="checkbox" name="Label-Short" id="wireCB-2"> Short-Label </label>
+
+            <input type="button" name="select-all" id="select-all" style="float: right;" value="SelAll"></label>
+
+          </div>
+
           <!-- Button (Double) -->
           <!-- Button (Double) -->
           <!-- Button (Double) -->
           <!-- Button (Double) -->
           <!-- Button (Double) -->
+      </fieldset>
+      <fieldset>
+
           <div class="form-group">
-            <label class="col-md-4 control-label" for="previewBtn">Preview</label>
-            <div class="col-md-8"> <button id="previewBtn" name="previewBtn" class="btn btn-primary">Preview</button> <button id="printBtn" name="printBtn" class="btn btn-warning">Print</button> </div>
+
+            <div class="col-md-8">
+              <button id="previewBtn" name="previewBtn" class="btn btn-primary" onclick="loading();">Preview</button>
+              <button id="printBtn" name="printBtn" class="btn btn-warning" onclick="loading();">Print</button> </div>
           </div>
-          <div class="spacer"><br><br></div>
-          <div class="form-group" padding-top=50px>
-            <label class="col-md-4 preview-label" name="preview-label" for="previewSection">Preview Section</label>
-          </div>
-          <div class="spacer"></div>
-          <!--  Label Preview Section-->
-          <!--  Label Preview Section-->
-          <!--  Label Preview Section-->
-          <div class="form-group">
-            <img src="{{ url_for('static', filename='blank-label.gif') }}" alt="pic1">
-            <!-- <img src="blank-label.gif" alt="pic1"> -->
-          </div>
+
+          <div class="spacer"><br></div>
+          <!--  Label Preview -->
+          <label class="col-md-4 control-label" for="previewBtn">Preview</label>
+
+          <div id="loading"></div>
+          <div id="content" class="form-group"> <img src="{{ url_for('static', filename='./imgs/' + imgFile) + '?ver=' + tics }}" alt="pic1" style="border: 1px solid red">
+            <!-- <img src="blank-label.gif" alt="pic1"> --></div>
       </fieldset>
     </form>
     </div>

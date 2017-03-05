@@ -1,6 +1,9 @@
-preview.jpeg
+__pycache__/
 *.pyc
 *.pyo
 app.db
 search.db
 flask
+imgs/preview.png
+txt2img.png
+wl
