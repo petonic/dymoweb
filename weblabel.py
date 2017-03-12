@@ -39,6 +39,8 @@ app.secret_key = 'A0Zr98j/3yX asdfzxcvR~XHH!jmN]LWX/,?RT'
 formText="Up to 3 lines max"
 
 def genPreview(lines, left, right, shortLabel, printIt = False):
+  # DBG:
+  log.info('*****\n****\n**** Working dir is %s'%os.getcwd())
   # print("***  Generating preview with %s\n"%repr(lines))
   # print("*** Preview and the text is <{}>".format(
   #     formText))
@@ -95,7 +97,8 @@ def genPreview(lines, left, right, shortLabel, printIt = False):
   if shortLabel:
     shortArr = ['-s']
   try:
-    subProcArr = [ printImageProg, shortArr, imgPrefix+fnPreview ]
+    subProcArr = [ "/usr/bin/nice", "-20", printImageProg, \
+        shortArr, imgPrefix+fnPreview ]
     subProcArr = list(itertools.chain.from_iterable(itertools.repeat(x,1)
                       if isinstance(x,str) else x for x in subProcArr))
     log.info("***\n*** Calling program %s\n***"%repr(subProcArr))   #DBG#
@@ -108,7 +111,6 @@ def genPreview(lines, left, right, shortLabel, printIt = False):
 @app.route('/index')
 def my_form():
   global formText
-  #DBG: print("Redrawing form")
   #
   # Copy the blank image file to the preview image file
   #
@@ -220,10 +222,12 @@ if __name__ == "__main__":
   log.setLevel(logging.INFO)
   log.addHandler(conh)
 
+  log.info('My execpath is %s'%repr(os.get_exec_path()))
+
   log.info("Info output")
   log.debug("debug output")
   log.error("error output")
 
   app.config['DEBUG'] = False
   app.config['TEMPLATES_AUTO_RELOAD'] = False
-  app.run("0.0.0.0", port=5000, debug=False)
+  app.run("0.0.0.0", port=80, debug=False)
