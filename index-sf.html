@@ -1,0 +1,205 @@
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width">
+
+
+
+
+  <link rel="apple-touch-icon" sizes="120x120" href="imgs/favicons/apple-touch-icon.png?v=lkgGalvOwx">
+  <link rel="icon" type="image/png" href="imgs/favicons/favicon-32x32.png?v=lkgGalvOwx" sizes="32x32">
+  <link rel="icon" type="image/png" href="imgs/favicons/favicon-16x16.png?v=lkgGalvOwx" sizes="16x16">
+  <link rel="manifest" href="imgs/favicons/manifest.json?v=lkgGalvOwx">
+  <link rel="mask-icon" href="imgs/favicons/safari-pinned-tab.svg?v=lkgGalvOwx" color="#5bbad5">
+  <link rel="shortcut icon" href="imgs/favicons/favicon.ico?v=lkgGalvOwx">
+  <meta name="apple-mobile-web-app-title" content="labelSF">
+  <meta name="application-name" content="labelSF">
+  <meta name="msapplication-config" content="imgs/favicons/browserconfig.xml?v=lkgGalvOwx">
+  <meta name="theme-color" content="#ffffff">
+
+
+    <style>
+
+  body {
+    background-color: powderblue;
+    font-size: 16px;
+    font-size: 5vw;
+  }
+  /*body {
+  zoom: 130%;
+  }*/
+
+  input,
+  textarea,
+  keygen,
+  select,
+  button {
+    text-rendering: auto;
+    color: initial;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    text-align: start;
+    margin: 0em 0em 0em 0em;
+    font: 5vw BlinkMacSystemFont;
+  }
+
+  textarea {
+    width:100%;
+    rows:3;
+  }
+
+  input[type="checkbox"] {
+    zoom: 3;
+  }
+
+
+  textarea {
+    overflow: scroll;
+    resize: none;
+    overflow: scroll;
+    rows: 3;
+  }
+
+  .col-md-4 {
+    overflow: scroll;
+    resize: none;
+    overflow: scroll;
+    rows: 3;
+    font-size: 16px;
+    font-size: 5vw;
+  }
+
+  div#loading {
+      width: 35px;
+      height: 35px;
+      display: none;
+      background: url(/imgs/ajax-loader.png) no-repeat;
+      cursor: wait;
+  }
+
+
+  </style>
+  <!--
+  *************************************************************
+  *************************************************************
+  *************************************************************
+  * Javascript for page
+  *************************************************************
+  *************************************************************
+  *************************************************************
+   -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+  <script src="imgs/favicon//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+  <script>
+  $(document).ready(function() {
+    if (!({{deleteCookies}})) {
+      $("[id^=wireCB]").each(function() {
+        var mycookie = $.cookie($(this).attr('name'));
+        if (mycookie && mycookie === "true") {
+          $(this).prop('checked', mycookie);
+        }
+      });
+    }
+    $("[id^=wireCB]").change(function() {
+      console.log("Logging change on " + $(this).attr("name"));
+      $.cookie($(this).attr("name"), $(this).prop('checked'), {
+        path: '/',
+        expires: 365
+      });
+    });
+    // Select the textArea initially
+    // document.getElementById("textarea").select();
+    // document.getElementById("textarea").focus();
+    // setSelectionRange(0, 9999);
+    $('#select-all').click(function() {
+        document.getElementById("textarea").selectionStart = 0;
+        document.getElementById("textarea").selectionEnd = 999;
+        document.getElementById("textarea").focus();
+    });
+
+    // Makes alignment checkboxes mutually exclusive
+    $('.align-cb').click(function() {
+      $(this).siblings('input:checkbox').prop('checked', false);
+    });
+
+
+
+
+
+
+  });
+
+  // Call this to create a loading screen.
+  function loading(){
+      $("#loading").show();
+      $("#content").hide();
+  }
+
+
+
+  </script>
+</head>
+
+<body>
+  <div id="screenFiller">
+    <form class="form-horizontal">
+      <fieldset>
+        <!-- Form Name -->
+        <legend>Label Printer SF</legend>
+        <div class="warning" color=red> <font color="red">{{ warnText }} </font></div>
+        <!-- Textarea -->
+        <div class="form-group">
+          <label class="col-md-4 control-label" for="textarea">Label Text</label>
+          <div class="col-md-4"> <textarea class="form-control" id="textarea" name="labelText" rows=3 font-size=5vw>{{ displayText }}</textarea> </div>
+        </div>
+        <!-- Multiple Checkboxes (inline) -->
+        <div class="form-group">
+          <!-- Multiple Checkboxes (inline) -->
+          <!-- Multiple Checkboxes (inline) -->
+          <!-- Multiple Checkboxes (inline) -->
+          <!-- Multiple Checkboxes (inline) -->
+          <label class="col-md-4 control-label" for="wireCB">Justification (def: Centered)</label>
+          <div class="col-md-4">
+            <input type="checkbox" class="align-cb" name="wireCB-Left" id="wireCB-0"> Left </label>
+            <input type="checkbox" class="align-cb" name="wireCB-Right" id="wireCB-1"> Right </label>
+          </div>
+          <div class="col-md-4-x">
+
+            <input type="checkbox" name="Label-Short" id="wireCB-2"> Short-Label </label>
+
+            <input type="button" name="select-all" id="select-all" style="float: right;" value="SelAll"></label>
+
+          </div>
+
+          <!-- Button (Double) -->
+          <!-- Button (Double) -->
+          <!-- Button (Double) -->
+          <!-- Button (Double) -->
+          <!-- Button (Double) -->
+      </fieldset>
+      <fieldset>
+
+          <div class="form-group">
+
+            <div class="col-md-8">
+              <button id="previewBtn" name="previewBtn" class="btn btn-primary" onclick="loading();">Preview</button>
+              <button id="printBtn" name="printBtn" class="btn btn-warning" onclick="loading();">Print</button> </div>
+          </div>
+
+          <div class="spacer"><br></div>
+          <!--  Label Preview -->
+          <label class="col-md-4 control-label" for="previewBtn">Preview</label>
+
+          <div id="loading"></div>
+          <div id="content" class="form-group"> <img src="{{ url_for('static', filename='./imgs/' + imgFile) + '?ver=' + tics }}" alt="pic1" style="border: 1px solid red">
+            <!-- <img src="blank-label.gif" alt="pic1"> --></div>
+      </fieldset>
+    </form>
+    </div>
+</body>
+
+</html>
