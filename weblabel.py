@@ -22,6 +22,29 @@ printImageProg = dymoPrefix + "imgprint"
 defaultFont = "/usr/share/fonts/truetype/" + \
       "msttcorefonts/Comic_Sans_MS_Bold.ttf"
 
+def resetDymo():
+    """Reset's the USB interface to the Dymo label printer.
+    Found this on the following link:
+    http://askubuntu.com/questions/645/how-do-you-reset-a-usb-device-from-the-command-line
+    """
+
+    import fcntl
+    USBDEVFS_RESET= 21780
+    driver='Dymo-CoStar Corp'
+
+    try:
+        lsusb_out = subprocess.check_output('lsusb | grep -i "%s"'%driver, shell=True).decode("utf-8").strip().split()
+        # lsusb_out = Popen("lsusb | grep -i %s"%driver, shell=True, bufsize=64, stdin=PIPE, stdout=PIPE, close_fds=True).stdout.read().strip().split()
+        bus = lsusb_out[1]
+        device = lsusb_out[3][:-1]
+        dpath = "/dev/bus/usb/%s/%s"%(bus, device)
+        print ('\t%s' % dpath)
+        f = open(dpath, 'w', os.O_WRONLY)
+        fcntl.ioctl(f, USBDEVFS_RESET, 0)
+    except Exception as e:
+        print ("failed to reset device: %s"%repr(e), file=sys.stderr)
+        sys.exit(13)
+
 
 app = Flask(__name__,
             template_folder="./",
@@ -90,9 +113,15 @@ def genPreview(lines, left, right, shortLabel, printIt = False):
 
   if not printIt:
     return False
+
+  # Reset the USB setting
+  import time
+  resetDymo()
+  time.sleep(2)
   #
   # Now, print the file
   #
+
   shortArr = []
   if shortLabel:
     shortArr = ['-s']
