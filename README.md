@@ -1,6 +1,7 @@
 # dymoweb
 WebServer to host a simple web page to print labels
 
+
 ## Introduction
 
 It presents a web server on port 5000 of the localhost and prints labels on a Dymo Label-manager.
@@ -56,6 +57,20 @@ sudo chmod a+rw /dev/hidraw*
 * Reboot to get ```supervisord``` working and the dymoweb server working
 
 This will make it so that the web server starts up at boot time and it's monitored, and logged.  Log files are in ```/var/log/dymoweb.{err,out}.log```
+
+## For Wifi, change /boot/wpa_supplicant.
+
+As user:
+
+```
+sudo rm -f /boot/wpa_supplicant
+sudo mv /etc/wpa_supplicant/wpa_supplicant.conf /boot
+sudo ln -s /boot/wpa_supplicant.conf wpa_supplicant.conf
+```
+This will put the wifi network config file accessible on the /boot partition of the SDCard, which makes it easy for a Mac or PC user to configure.
+
+
+
 
 ## Misc
 

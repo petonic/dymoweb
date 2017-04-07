@@ -16,6 +16,11 @@ dymoPrefix="/home/pi/labelprint/"
 imgPrefix="./imgs/"
 fnBlank = "preview-none.gif"
 fnPreview = "preview.png"
+defIndexFile = "index.html"
+indexConfig = "/home/pi/weblabel/indexFilename"
+
+
+
 
 txt2imgProg = dymoPrefix + "txt2img"
 printImageProg = dymoPrefix + "imgprint"
@@ -23,27 +28,27 @@ defaultFont = "/usr/share/fonts/truetype/" + \
       "msttcorefonts/Comic_Sans_MS_Bold.ttf"
 
 def resetDymo():
-    """Reset's the USB interface to the Dymo label printer.
-    Found this on the following link:
-    http://askubuntu.com/questions/645/how-do-you-reset-a-usb-device-from-the-command-line
-    """
+  """Reset's the USB interface to the Dymo label printer.
+  Found this on the following link:
+  http://askubuntu.com/questions/645/how-do-you-reset-a-usb-device-from-the-command-line
+  """
 
-    import fcntl
-    USBDEVFS_RESET= 21780
-    driver='Dymo-CoStar Corp'
+  import fcntl
+  USBDEVFS_RESET= 21780
+  driver='Dymo-CoStar Corp'
 
-    try:
-        lsusb_out = subprocess.check_output('lsusb | grep -i "%s"'%driver, shell=True).decode("utf-8").strip().split()
-        # lsusb_out = Popen("lsusb | grep -i %s"%driver, shell=True, bufsize=64, stdin=PIPE, stdout=PIPE, close_fds=True).stdout.read().strip().split()
-        bus = lsusb_out[1]
-        device = lsusb_out[3][:-1]
-        dpath = "/dev/bus/usb/%s/%s"%(bus, device)
-        print ('\t%s' % dpath)
-        f = open(dpath, 'w', os.O_WRONLY)
-        fcntl.ioctl(f, USBDEVFS_RESET, 0)
-    except Exception as e:
-        print ("failed to reset device: %s"%repr(e), file=sys.stderr)
-        sys.exit(13)
+  try:
+    lsusb_out = subprocess.check_output('lsusb | grep -i "%s"'%driver,
+                    shell=True).decode("utf-8").strip().split()
+    bus = lsusb_out[1]
+    device = lsusb_out[3][:-1]
+    dpath = "/dev/bus/usb/%s/%s"%(bus, device)
+    print ('\t%s' % dpath)
+    f = open(dpath, 'w', os.O_WRONLY)
+    fcntl.ioctl(f, USBDEVFS_RESET, 0)
+  except Exception as e:
+    print ("failed to reset device: %s"%repr(e), file=sys.stderr)
+    sys.exit(13)
 
 
 app = Flask(__name__,
@@ -71,14 +76,14 @@ def genPreview(lines, left, right, shortLabel, printIt = False):
   #     left, right))
   # print("Len of lines is %d"%len(lines))
   for i in range(0,len(lines)):
-    if (not len(lines[i])) or lines[i].isspace():
-      lines[i]="";
-  # for i in lines:
-  #   print("%s"%repr(i))
-  if not len(lines):
-    return "Empty input data"
+      if (not len(lines[i])) or lines[i].isspace():
+          lines[i]="";
+      # for i in lines:
+      #   print("%s"%repr(i))
+      if not len(lines):
+          return "Empty input data"
   if len(lines) > 3:
-    return "Too many lines (>3) = %d"%len(lines)
+      return "Too many lines (>3) = %d"%len(lines)
   # Specify left, right or no alignment
   if left:
     alignArr = ['-a', 'l']
@@ -179,12 +184,12 @@ def my_form():
   if 'previewBtn' in request.args:
     rv = genPreview(lines, wireLabelLeft, wireLabelRight, shortLabel)
     if rv:
-      return render_template("./index.html", warnText = rv, imgFile=fnBlank,
+      return render_template(indexFile, warnText = rv, imgFile=fnBlank,
                              tics=str(random.random()),
                              deleteCookies="false",
                              displayText="")
     else:
-      return render_template("./index.html", warnText = "", imgFile=fnPreview,
+      return render_template(indexFile, warnText = "", imgFile=fnPreview,
                               tics=str(random.random()),
                               deleteCookies="false",
                               displayText = request.args.get('labelText'))
@@ -196,12 +201,12 @@ def my_form():
     rv = genPreview(lines, wireLabelLeft, wireLabelRight,
                     shortLabel, printIt = True)
     if rv:
-      return render_template("./index.html", warnText = rv, imgFile=fnBlank,
+      return render_template(indexFile, warnText = rv, imgFile=fnBlank,
                              tics=str(random.random()),
                              deleteCookies="false",
                              displayText="")
     else:
-      return render_template("./index.html", warnText = "", imgFile=fnPreview,
+      return render_template(indexFile, warnText = "", imgFile=fnPreview,
                               tics=str(random.random()),
                               deleteCookies="false",
                               displayText = request.args.get('labelText'))
@@ -219,7 +224,7 @@ def my_form():
     session.clear()
     # print("**** It's the first screen draw, no args")
     formText="Up to 3 lines max"
-    rv = render_template("./index.html", displayText = formText,
+    rv = render_template(indexFile, displayText = formText,
                            warnText = "", imgFile = fnBlank,
                            deleteCookies="true",
                            tics = str(random.random()))
@@ -234,7 +239,7 @@ def my_form():
   #
   else:
     print("****\n**** ERROR invalid args:", pformat(request.args))
-    return render_template("./index.html", displayText = formText,
+    return render_template(indexFile, displayText = formText,
                            warnText = "Invalid args",
                            tics = str(random.random()))
 
@@ -242,6 +247,23 @@ def my_form():
 if __name__ == "__main__":
   wlog = logging.getLogger('werkzeug')
   wlog.setLevel(logging.INFO)
+
+  # Get the html index file from the config
+  indexFile = defIndexFile
+  try:
+    with open(indexConfig, "r") as file:
+        indexFile = file.readline().strip()
+  except IOError as e:
+    print('%s: indexConfig cannot be read: %s: %s'%(sys.argv[0],
+          indexFile, repr(e.args)), file=sys.stderr)
+    print('\tUsing default of %s'%defIndexFile, file=sys.stderr)
+  except FileNotFoundError as e:
+    print('%s: indexConfig cannot be found: %s: %s'%(sys.argv[0],
+          indexFile, repr(e.args)), file=sys.stderr)
+    print('\tUsing default of %s'%defIndexFile, file=sys.stderr)
+
+
+
 
   conh = logging.StreamHandler()
   conh.setLevel(logging.INFO)
@@ -252,6 +274,7 @@ if __name__ == "__main__":
   log.addHandler(conh)
 
   log.info('My execpath is %s'%repr(os.get_exec_path()))
+  log.info('HTML Index file is %s'%repr(indexFile))
 
   log.info("Info output")
   log.debug("debug output")
