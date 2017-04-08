@@ -50,9 +50,10 @@ def resetDymo():
     print ("failed to reset device: %s"%repr(e), file=sys.stderr)
     sys.exit(13)
 
+#             template_folder="./",
+
 
 app = Flask(__name__,
-            template_folder="./",
             static_folder="./",
             static_url_path="")
 
@@ -94,7 +95,7 @@ def genPreview(lines, left, right, shortLabel, printIt = False):
   #
   # Now, try to call the txt2img program.
   #
-  # If things go well, it will create a file called "imgs/preview.png"
+  # If things go well, it will ~create a file called "imgs/preview.png"
   # which has the preview image.
   #
   try:
@@ -221,6 +222,7 @@ def my_form():
   # INITIAL SCREEN RENDERING
   #
   elif not len(request.args):
+    print('indexFile is %s'%repr(indexFile))
     session.clear()
     # print("**** It's the first screen draw, no args")
     formText="Up to 3 lines max"
@@ -280,6 +282,6 @@ if __name__ == "__main__":
   log.debug("debug output")
   log.error("error output")
 
-  app.config['DEBUG'] = False
-  app.config['TEMPLATES_AUTO_RELOAD'] = False
+  app.config['DEBUG'] = True
+  app.config['TEMPLATES_AUTO_RELOAD'] = True
   app.run("0.0.0.0", port=80, debug=False)
