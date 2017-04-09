@@ -1,0 +1,5 @@
+veros.*             Vero's Labeller
+karens.*            Karen's Pi
+labelsf.*           SF Labeller
+cherrypi.*          Jane's Cherry Pi
+.*                  Default Label Printer

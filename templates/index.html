@@ -1,24 +1,21 @@
 <html>
 
+
+
 <head>
   <meta name="viewport" content="width=device-width">
-
-
-
-
-  <link rel="apple-touch-icon" sizes="120x120" href="imgs/favicons/apple-touch-icon.png?v=lkgGalvOwx">
   <link rel="icon" type="image/png" href="imgs/favicons/favicon-32x32.png?v=lkgGalvOwx" sizes="32x32">
   <link rel="icon" type="image/png" href="imgs/favicons/favicon-16x16.png?v=lkgGalvOwx" sizes="16x16">
   <link rel="manifest" href="imgs/favicons/manifest.json?v=lkgGalvOwx">
   <link rel="mask-icon" href="imgs/favicons/safari-pinned-tab.svg?v=lkgGalvOwx" color="#5bbad5">
   <link rel="shortcut icon" href="imgs/favicons/favicon.ico?v=lkgGalvOwx">
   <meta name="apple-mobile-web-app-title" content="labelSF">
-  <meta name="application-name" content="labelSF">
+  <meta name="application-name" content="labeller">
   <meta name="msapplication-config" content="imgs/favicons/browserconfig.xml?v=lkgGalvOwx">
   <meta name="theme-color" content="#ffffff">
 
 
-    <style>
+<style>
 
   body {
     background-color: powderblue;
@@ -64,14 +61,29 @@
     rows: 3;
   }
 
-  .col-md-4 {
+  .col-md-4 .col-md-4-x {
     overflow: scroll;
     resize: none;
     overflow: scroll;
     rows: 3;
     font-size: 16px;
     font-size: 5vw;
+    vertical-align: top;
   }
+
+  .col-md-4 {
+    text-decoration: underline;
+  }
+
+
+  div#misc-opt {
+    resize: none;
+    overflow: scroll;
+    rows: 1;
+    font-size: 9vw;
+    vertical-align: top;
+  }
+
 
   div#loading {
       width: 35px;
@@ -95,6 +107,16 @@
   <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
   <script src="imgs/favicon//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
   <script>
+
+  function select_all(){
+      console.log('Selecting All *******************************');
+      document.getElementById("textarea").selectionStart = 0;
+      document.getElementById("textarea").selectionEnd = 999;
+      document.getElementById("textarea").focus();
+  }
+
+
+
   $(document).ready(function() {
     if (!({{deleteCookies}})) {
       $("[id^=wireCB]").each(function() {
@@ -111,16 +133,10 @@
         expires: 365
       });
     });
-    // Select the textArea initially
-    // document.getElementById("textarea").select();
-    // document.getElementById("textarea").focus();
-    // setSelectionRange(0, 9999);
-    $('#select-all').click(function() {
-        document.getElementById("textarea").selectionStart = 0;
-        document.getElementById("textarea").selectionEnd = 999;
-        document.getElementById("textarea").focus();
-    });
 
+    //
+    // Select the textArea initially
+    //
     // Makes alignment checkboxes mutually exclusive
     $('.align-cb').click(function() {
       $(this).siblings('input:checkbox').prop('checked', false);
@@ -149,7 +165,7 @@
     <form class="form-horizontal">
       <fieldset>
         <!-- Form Name -->
-        <legend>Label Printer</legend>
+        <legend>{% include 'LABELHOST.txt' %}</legend>
         <div class="warning" color=red> <font color="red">{{ warnText }} </font></div>
         <!-- Textarea -->
         <div class="form-group">
@@ -157,42 +173,58 @@
           <div class="col-md-4"> <textarea class="form-control" id="textarea" name="labelText" rows=3 font-size=5vw>{{ displayText }}</textarea> </div>
         </div>
         <!-- Multiple Checkboxes (inline) -->
-        <div class="form-group">
-          <!-- Multiple Checkboxes (inline) -->
-          <!-- Multiple Checkboxes (inline) -->
-          <!-- Multiple Checkboxes (inline) -->
-          <!-- Multiple Checkboxes (inline) -->
           <label class="col-md-4 control-label" for="wireCB">Justification (def: Centered)</label>
           <div class="col-md-4">
-            <input type="checkbox" class="align-cb" name="wireCB-Left" id="wireCB-0"> Left </label>
-            <input type="checkbox" class="align-cb" name="wireCB-Right" id="wireCB-1"> Right </label>
+            <table style="empty-cells:hide;" border="0"   cellpadding="1" cellspacing="1">
+              <tr>
+                <td class="top">
+                  <input type="checkbox" class="align-cb" name="wireCB-Left" id="wireCB-0"></label>
+                </td>
+                <td class="top">
+                  Left
+                </td>
+                <td class="top">
+                  <input type="checkbox" class="align-cb" name="wireCB-Right" id="wireCB-1"></label>
+                </td>
+                <td class="top">
+                  Right
+                </td>
+              </tr>
+            </table>
           </div>
-          <div class="col-md-4-x">
 
-            <input type="checkbox" name="Label-Short" id="wireCB-2"> Short-Label </label>
+          <div id="col-md-4">
+            <label class="col-md-4 control-label" for="wireCB">Misc Options</label>
 
-            <input type="button" name="select-all" id="select-all" style="float: right;" value="SelAll"></label>
 
+            <table style="empty-cells:hide;" border="0"   cellpadding="1" cellspacing="1">
+              <tr>
+                <td class="top">
+                  <input type="checkbox" name="Label-Short" id="wireCB-2"></label>
+                </td>
+                <td class="top">
+                  Short<br>Label
+                </td>
+
+                <td class="top">
+                  <button type="button" onclick="select_all();" name="Select_All">SelAll</button>
+                </td>
+              </tr>
+            </table>
           </div>
 
-          <!-- Button (Double) -->
-          <!-- Button (Double) -->
-          <!-- Button (Double) -->
-          <!-- Button (Double) -->
-          <!-- Button (Double) -->
       </fieldset>
       <fieldset>
 
           <div class="form-group">
 
-            <div class="col-md-8">
               <button id="previewBtn" name="previewBtn" class="btn btn-primary" onclick="loading();">Preview</button>
-              <button id="printBtn" name="printBtn" class="btn btn-warning" onclick="loading();">Print</button> </div>
+              <button id="printBtn" name="printBtn" class="btn btn-warning" onclick="loading();">Print</button>
           </div>
 
           <div class="spacer"><br></div>
           <!--  Label Preview -->
-          <label class="col-md-4 control-label" for="previewBtn">Preview</label>
+          <label class="col-md-4 control-label" for="previewBtn">Preview: {{ desc }} </label>
 
           <div id="loading"></div>
           <div id="content" class="form-group"> <img src="{{ url_for('static', filename='./imgs/' + imgFile) + '?ver=' + tics }}" alt="pic1" style="border: 1px solid red">

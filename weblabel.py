@@ -10,15 +10,16 @@ import itertools
 import sys
 import random
 import os
+import re
 import logging
 
 dymoPrefix="/home/pi/labelprint/"
 imgPrefix="./imgs/"
 fnBlank = "preview-none.gif"
 fnPreview = "preview.png"
-defIndexFile = "index.html"
-indexConfig = "/home/pi/weblabel/indexFilename"
+indexFile = "index.html"
 
+pngLen = 0.0
 
 
 
@@ -68,6 +69,7 @@ app.secret_key = 'A0Zr98j/3yX asdfzxcvR~XHH!jmN]LWX/,?RT'
 formText="Up to 3 lines max"
 
 def genPreview(lines, left, right, shortLabel, printIt = False):
+  global pngLen
   # DBG:
   log.info('*****\n****\n**** Working dir is %s'%os.getcwd())
   # print("***  Generating preview with %s\n"%repr(lines))
@@ -92,6 +94,10 @@ def genPreview(lines, left, right, shortLabel, printIt = False):
     alignArr = ['-a', 'r']
   else:
     alignArr = []
+
+  # For safety's sake, reset the USB on the label printer
+  resetDymo()
+
   #
   # Now, try to call the txt2img program.
   #
@@ -117,13 +123,23 @@ def genPreview(lines, left, right, shortLabel, printIt = False):
   except subprocess.CalledProcessError as e:
     return "error running txt2img: %s"%(repr(e))
 
+  pngInfo = subprocess.check_output(['/usr/bin/file', imgPrefix+fnPreview],
+             shell=False).decode("utf-8")
+  # preview.png: PNG image data, 606 x 64, 8-bit/color RGB, non-interlaced
+  match = re.search(r'PNG image data, ([0-9]+) x [0-9]+', pngInfo)
+  tmpLen = int(match.group(1))
+  if not match:
+    print('{}: error getting png info:{}:{}'.format(
+        sys.argv[0], imgPrefix+fnPreview, repr(pngInfo)), file=sys.stderr)
+    sys.exit(23)
+  pngLen = float(tmpLen) / 64.0
+
   if not printIt:
-    return False
+    return None
 
   # Reset the USB setting
   import time
-  resetDymo()
-  time.sleep(2)
+  time.sleep(1)
   #
   # Now, print the file
   #
@@ -145,7 +161,7 @@ def genPreview(lines, left, right, shortLabel, printIt = False):
 @app.route('/')
 @app.route('/index')
 def my_form():
-  global formText
+  global formText, pngLen
   #
   # Copy the blank image file to the preview image file
   #
@@ -188,11 +204,13 @@ def my_form():
       return render_template(indexFile, warnText = rv, imgFile=fnBlank,
                              tics=str(random.random()),
                              deleteCookies="false",
+                             desc='Len = {:.1f} in.'.format(pngLen),
                              displayText="")
     else:
       return render_template(indexFile, warnText = "", imgFile=fnPreview,
                               tics=str(random.random()),
                               deleteCookies="false",
+                              desc='Len = {:.1f} in.'.format(pngLen),
                               displayText = request.args.get('labelText'))
 
   #
@@ -204,11 +222,13 @@ def my_form():
     if rv:
       return render_template(indexFile, warnText = rv, imgFile=fnBlank,
                              tics=str(random.random()),
+                             desc='Printed',
                              deleteCookies="false",
                              displayText="")
     else:
       return render_template(indexFile, warnText = "", imgFile=fnPreview,
                               tics=str(random.random()),
+                              desc='Printed',
                               deleteCookies="false",
                               displayText = request.args.get('labelText'))
 
@@ -250,20 +270,37 @@ if __name__ == "__main__":
   wlog = logging.getLogger('werkzeug')
   wlog.setLevel(logging.INFO)
 
-  # Get the html index file from the config
-  indexFile = defIndexFile
+  # Write the name of the label printer into
+  # ./templates/LABELHOST.txt.  Lookup the entries
+  # in ./HOSTMAP.txt
+  # Store this into ----> 'pageName'
+  pageName = "NOTFOUND"
+  hostname = os.uname().nodename
   try:
-    with open(indexConfig, "r") as file:
-        indexFile = file.readline().strip()
+    with open("HOSTMAP.txt", "r") as file:
+      for line in file:
+        (regex, label) = line.split(None,1)
+        match = re.match(regex, hostname)
+        if match:
+          pageName = label.strip()
+          break
+      if pageName == "NOTFOUND":
+        print('%s:labeller name not found in HOSTMAP.txt, defaulting to %s'%(
+            sys.argv[0],'Labeller'), file=sys.stderr)
+        pageName = 'Labeller'
+  except IOError:
+      print('%s: Error opening HOSTMAP.txt, defaulting to %s'%(
+          sys.argv[0],'Labeller'), file=sys.stderr)
+      pageName = 'Labeller'
+  # Now, write out the $pageName to the ./templates/LABELHOST.txt file
+  try:
+    with open('templates/LABELHOST.txt', "w") as file:
+      file.write(pageName + '\n')
   except IOError as e:
-    print('%s: indexConfig cannot be read: %s: %s'%(sys.argv[0],
-          indexFile, repr(e.args)), file=sys.stderr)
-    print('\tUsing default of %s'%defIndexFile, file=sys.stderr)
-  except FileNotFoundError as e:
-    print('%s: indexConfig cannot be found: %s: %s'%(sys.argv[0],
-          indexFile, repr(e.args)), file=sys.stderr)
-    print('\tUsing default of %s'%defIndexFile, file=sys.stderr)
-
+      print('{}: Fatal error writing "templates/LABELHOST.txt": {}'
+        .format(sys.argv[0], repr(e)), file=sys.stderr)
+      sys.exit(5)
+  print('... Page title is %s'%pageName)
 
 
 
@@ -284,4 +321,4 @@ if __name__ == "__main__":
 
   app.config['DEBUG'] = True
   app.config['TEMPLATES_AUTO_RELOAD'] = True
-  app.run("0.0.0.0", port=80, debug=False)
+  app.run("0.0.0.0", port=80, debug=True)
