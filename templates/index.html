@@ -1,6 +1,13 @@
-<html>
+    <html>
 
 
+<!--  TODO: Make cookies work for the alignment, and short label
+using Window.localStorage and Window.localStorage.clear() to
+delete them.
+
+* TODO: Actually, use sessionStorage instead.  
+* https://www.w3schools.com/html/html5_webstorage.asp
+-->
 
 <head>
   <meta name="viewport" content="width=device-width">
@@ -111,13 +118,26 @@
   function select_all(){
       console.log('Selecting All *******************************');
       document.getElementById("textarea").selectionStart = 0;
-      document.getElementById("textarea").selectionEnd = 999;
+      document.getElementById("textarea").selectionEnd = 99999;
       document.getElementById("textarea").focus();
   }
 
 
 
   $(document).ready(function() {
+
+    // Clear local storage of valiues if deleteCookies is true.
+    if ({{deleteCookies}}) {
+      Window.localStorage.clear()
+    } else {
+      console.log("====== Cookies are:")
+      for (i=0; i < window.localStorage.length; ++i) {
+        console.log("\t"+window.localStorage.key(i) + " = " +
+          window.localStorage[window.localStorage.key(i)])
+      }
+    }
+
+
     if (!({{deleteCookies}})) {
       $("[id^=wireCB]").each(function() {
         var mycookie = $.cookie($(this).attr('name'));
@@ -178,13 +198,13 @@
             <table style="empty-cells:hide;" border="0"   cellpadding="1" cellspacing="1">
               <tr>
                 <td class="top">
-                  <input type="checkbox" class="align-cb" name="wireCB-Left" id="wireCB-0"></label>
+                  <input type="checkbox" class="align-cb" name="checkboxAlignLeft" id="cbAlignLeft"></label>
                 </td>
                 <td class="top">
                   Left
                 </td>
                 <td class="top">
-                  <input type="checkbox" class="align-cb" name="wireCB-Right" id="wireCB-1"></label>
+                  <input type="checkbox" class="align-cb" name="checkboxAlignRight" id="cbAlignRight"></label>
                 </td>
                 <td class="top">
                   Right

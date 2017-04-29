@@ -7,3 +7,4 @@ flask
 imgs/preview.png
 txt2img.png
 wl
+templates/LABELHOST.txt
