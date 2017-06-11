@@ -13,6 +13,9 @@ import os
 import re
 import logging
 
+
+
+
 dymoPrefix = "/home/pi/labelprint/"
 imgPrefix = "./imgs/"
 fnBlank = "preview-none.gif"
