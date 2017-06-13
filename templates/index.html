@@ -5,7 +5,7 @@
 using Window.localStorage and Window.localStorage.clear() to
 delete them.
 
-* TODO: Actually, use sessionStorage instead.  
+* TODO: Actually, use sessionStorage instead.
 * https://www.w3schools.com/html/html5_webstorage.asp
 -->
 
@@ -78,9 +78,6 @@ delete them.
     vertical-align: top;
   }
 
-  .col-md-4 {
-    text-decoration: underline;
-  }
 
 
   div#misc-opt {
@@ -189,11 +186,11 @@ delete them.
         <div class="warning" color=red> <font color="red">{{ warnText }} </font></div>
         <!-- Textarea -->
         <div class="form-group">
-          <label class="col-md-4 control-label" for="textarea">Label Text</label>
+          <label class="col-md-4 control-label" for="textarea"><u>Label Text</u></label>
           <div class="col-md-4"> <textarea class="form-control" id="textarea" name="labelText" rows=3 font-size=5vw>{{ displayText }}</textarea> </div>
         </div>
         <!-- Multiple Checkboxes (inline) -->
-          <label class="col-md-4 control-label" for="wireCB">Justification (def: Centered)</label>
+          <label class="col-md-4 control-label" for="wireCB"><u>Justification</u> (def: Centered)</label>
           <div class="col-md-4">
             <table style="empty-cells:hide;" border="0"   cellpadding="1" cellspacing="1">
               <tr>
@@ -214,7 +211,7 @@ delete them.
           </div>
 
           <div id="col-md-4">
-            <label class="col-md-4 control-label" for="wireCB">Misc Options</label>
+            <label class="col-md-4 control-label" for="wireCB"><u>Misc Options</u></label>
 
 
             <table style="empty-cells:hide;" border="0"   cellpadding="1" cellspacing="1">
@@ -244,7 +241,7 @@ delete them.
 
           <div class="spacer"><br></div>
           <!--  Label Preview -->
-          <label class="col-md-4 control-label" for="previewBtn">Preview: {{ desc }} </label>
+          <label class="col-md-4 control-label" for="previewBtn"><u>Preview:</u> {{ desc }} </label>
 
           <div id="loading"></div>
           <div id="content" class="form-group"> <img src="{{ url_for('static', filename='./imgs/' + imgFile) + '?ver=' + tics }}" alt="pic1" style="border: 1px solid red">
