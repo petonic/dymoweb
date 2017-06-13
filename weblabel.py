@@ -22,9 +22,9 @@ fnBlank = "preview-none.gif"
 fnPreview = "preview.png"
 indexFile = "index.html"
 
-pngLen = 0.0
-shortLabelDelta = 56.0
-ptsPerInch = 72.0
+pngLen = ""
+shortLabelDelta = 0.4
+ptsPerInch = 360.0
 
 txt2imgProg = dymoPrefix + "txt2img"
 printImageProg = dymoPrefix + "imgprint"
@@ -148,8 +148,12 @@ def genPreview(lines, left, right, shortLabel, printIt=False):
                 sys.argv[0], imgPrefix + fnPreview, repr(pngInfo)),
             file=sys.stderr)
         sys.exit(23)
-    pngLen = float(tmpLen +
-                   (0 if shortLabel else shortLabelDelta)) / ptsPerInch
+    lltot =  float(tmpLen) / ptsPerInch + 0.6 + shortLabelDelta
+    llshort = float(tmpLen) / ptsPerInch + 0.5
+    pngLen = 'Len = {:.1f}", text-only = {:.1f}"'.format(lltot, llshort)
+
+    # pngLen = float(tmpLen +
+    #                (0 if shortLabel else shortLabelDelta)) / ptsPerInch
 
     if not printIt:
         return None
@@ -229,7 +233,7 @@ def my_form():
                 imgFile=fnBlank,
                 tics=str(random.random()),
                 deleteCookies="false",
-                desc='Len = {:.1f} in.'.format(pngLen),
+                desc=pngLen,
                 displayText="")
         else:
             return render_template(
@@ -238,7 +242,7 @@ def my_form():
                 imgFile=fnPreview,
                 tics=str(random.random()),
                 deleteCookies="false",
-                desc='Len = {:.1f} in.'.format(pngLen),
+                desc=pngLen,
                 displayText=request.args.get('labelText'))
 
     #
@@ -351,6 +355,9 @@ if __name__ == "__main__":
 
     conh = logging.StreamHandler()
     conh.setLevel(logging.INFO)
+
+    formatter = logging.Formatter('%(asctime)s: %(message)s')
+    conh.setFormatter(formatter)
 
     log = logging.getLogger('')
     log.setLevel(logging.INFO)
