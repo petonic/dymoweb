@@ -13,7 +13,8 @@ import os
 import re
 import logging
 
-
+# reports 1.9, really 2.75
+# 1.44736842105
 
 
 dymoPrefix = "/home/pi/labelprint/"
@@ -23,8 +24,8 @@ fnPreview = "preview.png"
 indexFile = "index.html"
 
 pngLen = ""
-shortLabelDelta = 0.4
-ptsPerInch = 360.0
+shortLabelDelta = 0.65
+ptsPerInch = 230.0
 
 txt2imgProg = dymoPrefix + "txt2img"
 printImageProg = dymoPrefix + "imgprint"
