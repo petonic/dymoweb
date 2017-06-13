@@ -24,8 +24,8 @@ fnPreview = "preview.png"
 indexFile = "index.html"
 
 pngLen = ""
-shortLabelDelta = 0.65
-ptsPerInch = 230.0
+labelMarginDelta = 0.6
+ptsPerInch = 180.0
 
 txt2imgProg = dymoPrefix + "txt2img"
 printImageProg = dymoPrefix + "imgprint"
@@ -149,12 +149,12 @@ def genPreview(lines, left, right, shortLabel, printIt=False):
                 sys.argv[0], imgPrefix + fnPreview, repr(pngInfo)),
             file=sys.stderr)
         sys.exit(23)
-    lltot =  float(tmpLen) / ptsPerInch + 0.6 + shortLabelDelta
-    llshort = float(tmpLen) / ptsPerInch + 0.5
-    pngLen = 'Len = {:.1f}", text-only = {:.1f}"'.format(lltot, llshort)
+    lltot =  float(tmpLen) / float(ptsPerInch) + labelMarginDelta
+    llshort = float(tmpLen) / float(ptsPerInch)
+    pngLen = 'Len = {:.2f}", text-only = {:.2f}"'.format(lltot, llshort)
 
     # pngLen = float(tmpLen +
-    #                (0 if shortLabel else shortLabelDelta)) / ptsPerInch
+    #                (0 if shortLabel else labelMarginDelta)) / ptsPerInch
 
     if not printIt:
         return None
