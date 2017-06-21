@@ -56,9 +56,6 @@ def resetDymo():
         return None
     except Exception as e:
         return("failed to reset device: %s\nIs it plugged in?" % repr(e))
-        render_template('devnotfound.html')
-        import time
-        time.sleep(30)
 
 
 
