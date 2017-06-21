@@ -53,9 +53,13 @@ def resetDymo():
         print('\t%s' % dpath)
         f = open(dpath, 'w', os.O_WRONLY)
         fcntl.ioctl(f, USBDEVFS_RESET, 0)
+        return None
     except Exception as e:
-        print("failed to reset device: %s" % repr(e), file=sys.stderr)
-        sys.exit(13)
+        return("failed to reset device: %s\nIs it plugged in?" % repr(e))
+        render_template('devnotfound.html')
+        import time
+        time.sleep(30)
+
 
 
 #             template_folder="./",
@@ -102,7 +106,9 @@ def genPreview(lines, left, right, shortLabel, printIt=False):
         alignArr = []
 
     # For safety's sake, reset the USB on the label printer
-    resetDymo()
+    warnMsg = resetDymo()
+    if warnMsg:
+      return warnMsg
 
     #
     # Now, try to call the txt2img program.
@@ -228,7 +234,7 @@ def my_form():
         rv = genPreview(lines, checkboxAlignLeft, checkboxAlignRight,
                         shortLabel)
         if rv:
-            return render_template(
+                return render_template(
                 indexFile,
                 warnText=rv,
                 imgFile=fnBlank,
@@ -317,7 +323,7 @@ if __name__ == "__main__":
     wlog.setLevel(logging.INFO)
 
     # Write the name of the label printer into
-    # ./templates/LABELHOST.txt.  Lookup the entries
+    # ./templates/LABEL.txt.  Lookup the entries
     # in ./HOSTMAP.txt
     # Store this into ----> 'pageName'
     pageName = "NOTFOUND"

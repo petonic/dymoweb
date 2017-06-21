@@ -184,6 +184,10 @@ delete them.
         <!-- Form Name -->
         <legend>{% include 'LABELHOST.txt' %}</legend>
         <div class="warning" color=red> <font color="red">{{ warnText }} </font></div>
+        {% if warnText %}
+        <br><a href="/">(Click this to Restart Program)</a><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        {% endif %}
         <!-- Textarea -->
         <div class="form-group">
           <label class="col-md-4 control-label" for="textarea"><u>Label Text</u></label>
