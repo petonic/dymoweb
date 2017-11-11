@@ -4,7 +4,7 @@ WebServer to host a simple web page to print labels
 
 It presents a web server on port 80 of the localhost and prints labels on a Dymo Label-manager.
 
-I use the excellent (and fast) [Perl package to print to Dymo Labelmakers](https://github.com/Firedrake/dymo-labelmanager) by FireDrake (with some local additions of my own to allow for line padding).
+I use the excellent (and fast) [Perl package to print to Dymo Labelmakers](https://github.com/Firedrake/dymo-labelmanager) by FireDrake (with some local additions of my own to allow for line padding).  Use the [version that I modified](https://github.com/petonic/dymo-labelmanager) because it has specific code that allows it to print without buffering through and leaving streaky lines in the output.
 
 # One-Time Config Steps for new PI
 
@@ -86,7 +86,7 @@ sudo apt-get -y install ttf-mscorefonts-installer
 ## Configure UDEV and Set Permissions
 
 ```
-sudo bash -c "cat > /etc/udev/rules.d/50dymo.rules" <<ENDFILE
+sudo bash -c "cat > /etc/udev/rules.d/50-dymo.rules" <<ENDFILE
 SUBSYSTEM=="hidraw",
 ACTION=="add",
 MODE=="0666",
