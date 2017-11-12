@@ -1,4 +1,4 @@
-# dymoweb
+m# dymoweb
 WebServer to host a simple web page to print labels
 
 
@@ -87,12 +87,21 @@ sudo apt-get -y install ttf-mscorefonts-installer
 
 ```
 sudo bash -c "cat > /etc/udev/rules.d/50-dymo.rules" <<ENDFILE
-SUBSYSTEM=="hidraw",
-ACTION=="add",
-MODE=="0666",
-ATTRS{idVendor}=="0922",
-ATTRS{idProduct}=="1001",
-GROUP="plugdev"
+SUBSYSTEM=="hidraw", \\
+    ACTION=="add", \\
+    MODE="0666", \\
+    ATTRS{idVendor}=="0922", \\
+    ATTRS{idProduct}=="1002", \\
+    GROUP="plugdev", \\
+    SYMLINK+="dymo"
+
+SUBSYSTEM=="usb", \\
+    ACTION=="add", \\
+    MODE="0666", \\
+    ATTRS{idVendor}=="0922", \\
+    ATTRS{idProduct}=="1002", \\
+    GROUP="plugdev", \\
+    SYMLINK+="dymoReset"
 ENDFILE
 
 sudo udevadm control --reload-rules && sudo udevadm trigger
@@ -102,6 +111,18 @@ sleep 10
 sudo chmod a+rw /dev/hidraw*
 
 ```
+
+## Add user PI to group LP
+This needs to happen because the dymoReset device points to a device file
+that is owned by root,lp.  It has group write privileges, so in order for our
+USB reset bit of code to work, we have to be part of the "lp" group.
+
+```
+sudo adduser pi lp
+```
+
+#
+
 
 ## Supervisord -- Additional install
 

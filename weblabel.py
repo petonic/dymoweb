@@ -18,6 +18,7 @@ import logging
 
 
 dymoPrefix = "/home/pi/labelprint/"
+dymoDevice = "/dev/dymo"
 imgPrefix = "./imgs/"
 fnBlank = "preview-none.gif"
 fnPreview = "preview.png"
@@ -43,6 +44,8 @@ def resetDymo():
     USBDEVFS_RESET = 21780
     driver = 'Dymo-CoStar Corp'
 
+    tfile = "/dev/dymoReset"
+
     try:
         lsusb_out = subprocess.check_output(
             'lsusb | grep -i "%s"' % driver,
@@ -50,13 +53,14 @@ def resetDymo():
         bus = lsusb_out[1]
         device = lsusb_out[3][:-1]
         dpath = "/dev/bus/usb/%s/%s" % (bus, device)
+        dpath = tfile
         print('\t%s' % dpath)
         f = open(dpath, 'w', os.O_WRONLY)
         fcntl.ioctl(f, USBDEVFS_RESET, 0)
         return None
     except Exception as e:
-        return("failed to reset device: %s\nIs it plugged in?" % repr(e))
-
+        return("failed to reset device ({}): {}<br>Is it plugged in?".format(
+                 dpath, repr(e)))
 
 
 #             template_folder="./",
@@ -170,11 +174,12 @@ def genPreview(lines, left, right, shortLabel, printIt=False):
     #
 
     shortArr = []
+
     if shortLabel:
         shortArr = ['-s']
     try:
         subProcArr = [ "/usr/bin/nice", "-20", printImageProg, \
-            shortArr, imgPrefix+fnPreview ]
+            shortArr, '-d', dymoDevice, imgPrefix+fnPreview ]
         subProcArr = list(
             itertools.chain.from_iterable(
                 itertools.repeat(x, 1) if isinstance(x, str) else x
